@@ -1,0 +1,16 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+topology_template:
+  node_templates:
+    NS1:
+      type: tosca.nodes.nfv.NS
+      properties:
+        descriptor_id: 1b4dd4c7-1dd2-11b2-8000-080027b246c9
+        designer: imac
+        version: 1.0
+        name: mec-platform
+        invariant_id: 1111-2222-aaaa-bbbb
+        deployed_cluster:
+          - name: edge
+            constituent_appd:
+            - appd_id: 367f45fd-1dd2-11b2-8000-0800platform
