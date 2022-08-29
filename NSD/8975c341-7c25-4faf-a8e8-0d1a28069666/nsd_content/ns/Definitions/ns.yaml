@@ -1,0 +1,19 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+topology_template:
+  node_templates:
+    NS:
+      type: tosca.nodes.nfv.NS
+      properties:
+        descriptor_id: fb7280fc-4f6e-4aa4-aa7f-4217ef8bcaba
+        designer: imac
+        version: 1.0
+        name: imac-mec-app
+        invariant_id: 1111-2222-aaaa-bbbb
+        deployed_cluster:
+          name: edgeA
+          platform_name: smart_edge_open
+          constituent_appd:
+          - appd_id: 367f45fd-1dd2-11b2-8001-080027ubuntu
+          - appd_id: 367f45fd-1dd2-11b2-8001-080028ubuntu
+#          - appd_id: 367f45fd-1dd2-11b2-8001-080029ubuntu
