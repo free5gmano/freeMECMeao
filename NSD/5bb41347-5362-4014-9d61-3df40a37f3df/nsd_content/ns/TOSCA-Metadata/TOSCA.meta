@@ -2,6 +2,6 @@ TOSCA-Meta-File-Version: 1.0
 CSAR-Version: 1.1
 Created-By: IMAC
 Entry-Definitions: Definitions/ns.yaml
-ETSI-Entry-Manifest: mec-app.mf
+ETSI-Entry-Manifest: mec-platform.mf
 ETSI-Entry-Change-Log: Files/ChangeLog.txt
 ETSI-Entry-Licenses: Files/Licenses

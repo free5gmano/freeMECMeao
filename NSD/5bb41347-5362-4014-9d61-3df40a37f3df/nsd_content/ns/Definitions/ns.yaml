@@ -5,15 +5,12 @@ topology_template:
     NS:
       type: tosca.nodes.nfv.NS
       properties:
-        descriptor_id: fb7280fc-4f6e-4aa4-aa7f-4217ef8bcaba
+        descriptor_id: 3bff20f3-bf34-4a77-84c9-c31c383fc58a
         designer: imac
         version: 1.0
-        name: imac-mec-app
+        name: mec-platform
         invariant_id: 1111-2222-aaaa-bbbb
         deployed_cluster:
           name: edgeA
-          platform_name: smart_edge_open
           constituent_appd:
-          - appd_id: 367f45fd-1dd2-11b2-8001-080027ubuntu
-          - appd_id: 367f45fd-1dd2-11b2-8001-080028ubuntu
-#          - appd_id: 367f45fd-1dd2-11b2-8001-080029ubuntu
+          - appd_id: 367f45fd-1dd2-11b2-8000-0800platform

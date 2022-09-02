@@ -96,6 +96,7 @@ class NSInstanceViewSet(viewsets.ModelViewSet):
                 ns_type="app"
             else :
                 return Response("MEC Platform not exist",status=status.HTTP_202_ACCEPTED)
+    
         for vnf_instance_info in vnf_instance_data:
             if 'vnfInstanceId' not in vnf_instance_info:
                 raise APIException(detail='vnfInstanceId is not existing',
@@ -104,7 +105,6 @@ class NSInstanceViewSet(viewsets.ModelViewSet):
             if vnf_instance is None:
                 raise APIException(detail='vnf_instance is not existing',
                                    code=status.HTTP_409_CONFLICT)
-            # mv1.check_url(ns_instance.)
             if ns_type == "app":
                 if vnf_instance.vnfProductName in helm_chart:
                     print("helm chart exist")
@@ -112,17 +112,45 @@ class NSInstanceViewSet(viewsets.ModelViewSet):
                     helm_chart[vnf_instance.vnfProductName]=vnf_instance.vnfProvider
                     mv1.addHelmChart(repoName=vnf_instance.vnfProductName,repoUrl=vnf_instance.vnfProvider)
                 platform_service_data=get_platform_service_data(vnf_instance.vnfPkgId)
-                print(platform_service_data)
                 mv1.createMECApp(repoName=vnf_instance.vnfProductName,mecApp=vnf_instance.appInfoName,mecName=vnf_instance.appName,
                                 serviceType=platform_service_data['platform_type'],service=platform_service_data['platform_describe'])
             else :
-                mv1.createMEC()
-
+                platform_check=mv1.checkMEC()
+                print(platform_check.json()["status"])
+                if platform_check.json()["status"] == "succeed":
+                    print("platform exist" )
+                else:
+                    print("create Platform")
+                    mv1.createMEC()
             vnf_instance.instantiationState = 'STARTED'
             vnf_instance.save()
 
         ns_instance.nsState = instantiated
         ns_instance.save()
-        
-        
+        return Response(status=status.HTTP_202_ACCEPTED)
+    @action(detail=True, methods=['POST'], url_path='terminate')
+    def terminate_ns(self, request, **kwargs):
+        ns_instance = self.get_object()
+        if 'vnfInstanceData' not in request.data:
+            raise APIException(detail='vnfInstanceData is not existing',
+                               code=status.HTTP_409_CONFLICT)
+        vnf_instance_data = request.data.pop('vnfInstanceData')
+        mv1=Mv1Agent(cluster_name=ns_instance.deployedCluster,mec_platform_name=ns_instance.platformName)
+        ns_type="platform"
+        if ns_instance.platformName != "None":
+            ns_type="app"
+        for vnf_instance_info in vnf_instance_data:
+            if 'vnfInstanceId' not in vnf_instance_info:
+                raise APIException(detail='vnfInstanceId is not existing',
+                                   code=status.HTTP_409_CONFLICT)
+            vnf_instance = ns_instance.NsInstance_VnfInstance.get(id=vnf_instance_info['vnfInstanceId'])
+            if ns_type=="app":
+                platform_service_data=get_platform_service_data(vnf_instance.vnfPkgId)
+                mv1.deleteMECApp(serviceType=platform_service_data['platform_type'],service=platform_service_data['platform_describe'])
+            else:
+                mv1.deleteMECPlatform()
+                vnf_instance.VnfInstance_instantiatedVnfInfo.vnfState = 'STOPPED'
+                vnf_instance.VnfInstance_instantiatedVnfInfo.save()
+        ns_instance.nsState = instantiated
+        ns_instance.save()
         return Response(status=status.HTTP_202_ACCEPTED)

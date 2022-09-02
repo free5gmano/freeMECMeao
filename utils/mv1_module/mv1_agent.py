@@ -19,10 +19,12 @@ class Mv1Agent :
         check_mec_json = dict()
         check_mec_json['cluster'] = self.cluster_name
         check_mec_json['mec_platform'] = self.mec_platform_name
+        print(check_mec_json)
         return requests.post(self.check_url,headers=self.headers,data=json.dumps(check_mec_json))
     def createMEC(self):
         check_mec_json = dict()
         check_mec_json['cluster'] = self.cluster_name
+        print(self.mec_platform_name)
         check_mec_json['mec_platform'] = self.mec_platform_name
         return requests.post(self.platform_url,headers=self.headers,data=json.dumps(check_mec_json))
     def addHelmChart(self,repoName,repoUrl):
@@ -41,7 +43,14 @@ class Mv1Agent :
         self.mec_app_json['mecPlatformServiceFunction']=service
         print(self.mec_app_json)
         return requests.post(self.app_url,headers=self.headers,data=json.dumps(self.mec_app_json))
-    
+    def deleteMECApp(self,serviceType,service):
+        self.mec_app_json['cluster']=self.cluster_name
+        self.mec_app_json['mec_platform']=self.mec_platform_name
+        self.mec_app_json['mecPlatformServiceType']=serviceType
+        self.mec_app_json['mecPlatformServiceFunction']=service
+        print(self.mec_app_json)
+        return requests.delete(self.app_url,headers=self.headers,data=json.dumps(self.mec_app_json))   
     def createMECPlatform(self):
         return requests.post(self.check_url,headers=self.headers,data=json.dumps(self.mec_platform_json))
-    
+    def deleteMECPlatform(self):
+        return requests.delete(self.check_url,headers=self.headers,data=json.dumps(self.mec_platform_json))
