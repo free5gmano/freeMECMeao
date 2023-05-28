@@ -1,0 +1,13 @@
+topology_template:
+  node_templates:
+    NS1:
+      properties:
+        constituent_vnfd:
+        - vnfd_id: 6c25674c-a1c4-44b5-bfaa-f3025mongodb
+        descriptor_id: 7c108880-22f5-4b20-80cc-f9d26107bc2c
+        designer: imac
+        invariant_id: 1111-2222-aaaa-bbbb
+        name: free5gc-stage3.2.1
+        version: 1.0
+      type: tosca.nodes.nfv.NS
+tosca_definitions_version: tosca_simple_yaml_1_2

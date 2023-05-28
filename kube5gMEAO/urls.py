@@ -13,14 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
-from rest_framework import permissions
-from django.conf.urls import url
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from django.urls import path
+from django.contrib import admin
+
+from VnfPackageManagement.views import *
+from AppLifecycleManagement.views import *
+
+Mm1_Mm3star_URI = {
+    "ApplicationPackages": "app_pkgm/v1/app_packages",
+    "ApplicationPackageContent": "app_pkgm/v1/app_packages/<str:app_package_Id>/package_content",
+    "ApplicationInstances": "app_lcm/v1/app_instances",
+    "InstantiateApplicationInstanceTask": "app_lcm/v1/app_instances/<str:appInstanceId>/instantiate",
+}
 
 urlpatterns = [
-    path('', include('VnfPackageManagement.urls')),
-    path('', include('NSManagement.urls')),
-    path('', include('NSInstanceManagement.urls')),
+    path('admin/', admin.site.urls),
+    path(Mm1_Mm3star_URI["ApplicationPackages"], application_packages),
+    path(Mm1_Mm3star_URI["ApplicationPackageContent"], application_package_content),
+    path(Mm1_Mm3star_URI["ApplicationInstances"], application_instances),
+    path(Mm1_Mm3star_URI["InstantiateApplicationInstanceTask"], instantiate_application_instance_task),
 ]

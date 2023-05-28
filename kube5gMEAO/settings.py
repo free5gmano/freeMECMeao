@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NFVO_PATH='http://10.0.0.229:30888/'
+NFVO_PATH='10.0.0.218:30888'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -39,14 +39,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'VnfPackageManagement.apps.VnfpackagemanagementConfig',
-    'NSInstanceManagement.apps.NsinstancemanagementConfig',
-    'NSManagement.apps.NsmanagementConfig',
+    "AppLifecycleManagement",
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

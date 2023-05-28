@@ -1,0 +1,501 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+description: ubuntu
+metadata:
+  template_name: ubuntu
+  template_author: chsixnine
+  template_version: 3.1.1
+
+imports:
+   - ubuntu.yaml
+
+data_types:
+  tosca.datatypes.mec.ServiceDependency:
+    derived_from: tosca.datatypes.Root
+    description: The requirements of a service-consuming MEC application to a MEC service
+    properties:
+      ser_name:
+        type: string
+        description: name of the service, for example, RNIS, LocationService, etc.
+        required: true
+        type: tosca.datatypes.mec.CategoryRef
+        description: a category reference of the service
+        required: false
+      version:
+        type: string
+        description: version of the service
+        required: true
+      ser_transport_dependencies:
+        type: list
+        description: the transport and serialization format dependencies of consuming the service
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.TransportDependency
+      requested_permissions:        
+        type: list
+        description: requested permissions regarding the access of the application to the service
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.Permission
+
+  tosca.datatypes.mec.ServiceDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: a MEC service produced by a service-providing MEC application
+    properties:
+      ser_name:
+        type: string
+        description: name of the service, for example, RNIS, LocationService, etc.
+        required: true
+      ser_category:
+        type: tosca.datatypes.mec.CategoryRef
+        description: a category reference of the service
+        required: false
+      version:
+        type: string
+        description: version of the service
+        required: true
+      transport_supported:
+        type: list
+        description: transport and serialization format supported by the service produced by the application
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.TransportSerializerDescriptor
+
+  tosca.datatypes.mec.FeatureDependency:
+    derived_from: tosca.datatypes.Root
+    description: requirements of a MEC application to a feature of the MEC platform
+    properties:
+      feature_name:
+        type: string
+        description: name of the feature, for example, UserApps, UEIdentity, etc.
+        required: true
+      version:
+        type: string
+        description: version of the feature
+        required: true
+
+  tosca.datatypes.mec.TransportDependency:
+    derived_from: tosca.datatypes.Root
+    description: requirements of a MEC application to the transport bindings
+    properties:
+      transport_serializer:
+        type: tosca.datatypes.mec.TransportSerializerDescriptor
+        description: information about the transport in this transport binding
+        required: true
+      labels:
+        type: list
+        description: set of labels that allow to define groups of transport bindings
+        required: true
+        entry_schema:
+          type: string
+
+  tosca.datatypes.mec.TrafficRuleDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: traffic rules related to a MEC application
+    properties:
+      traffic_rule_id:
+        type: string
+        description: identifier of the traffic rule.
+        required: true
+      filter_type:
+        type: string
+        description: filter type
+        required: true
+        constraints:
+          - valid_values: [ FLOW, PACKET ]
+      priority:
+        type: integer
+        description: priority of this traffic rule.
+        required: true
+        constraints:
+          - greater_or_equal: 0
+      traffic_filter:
+        type: list
+        description: the filter used to identify specific flow/packets that need to be handled by the MEC host.
+        required: true
+        entry_schema:
+          type: tosca.datatypes.mec.TrafficFilter
+      action:
+        type: string
+        description: the action of the MEC host data plane, when a packet matches the traffic_filter.
+        required: true
+        constraints:
+          - valid_values: [ DROP, FORWARD_DECAPSULATED, FORWARD_AS_IS, PASSTHROUGH, DUPLICATED_DECAPSULATED, DUPLICATE_AS_IS ]
+      dst_interface:
+        type: list
+        description: describes the destination interface information, if the action is FORWARD.
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.InterfaceDescriptor
+        constraints:
+          - max_length: 2
+
+  tosca.datatypes.mec.DNSRuleDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: DNS rules associated with a MEC application
+    properties:
+      dns_rule_id:
+        type: string
+        description: identifier of the DNS rule
+        required: true
+      domain_name:
+        type: string
+        description: FQDN of the DNS rule
+        required: true
+      ip_address_type:
+        type: string
+        description: IP address type
+        required: true
+        constraints:
+          - valid_values: [ IP_V6, IP_V4 ]
+      ip_address:
+        type: string
+        description: IP address given by the DNS rule
+        required: true
+      ttl:
+        type: integer
+        description: time-to-live value
+        required: true
+        constraints:
+          - greater_than: 0
+
+  tosca.datatypes.mec.LatencyDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: latency requirements of a MEC application
+    properties:
+      max_latency:
+        type: integer
+        description: maximum latency (in nano seconds) tolerated by the MEC application.
+        required: true
+        constraints:
+          - greater_than: 0
+
+  tosca.datatypes.mec.UserContextTransferCapability:
+    derived_from: tosca.datatypes.Root
+    description: information of user context transfer capability of the application
+    properties:
+      stateful_application:
+        type: boolean
+        description: whether the application is stateful.
+        required: true
+      user_context_transfer_support:
+        type: boolean
+        description: whether the application supports the user context transfer capability, only applicable when the application is stateful
+        required: false
+
+  tosca.datatypes.mec.AppNetworkPolicy:
+    derived_from: tosca.datatypes.Root
+    description: network policy used in the application instantiation and operation
+    properties:
+      cellular_network:
+        type: boolean
+        description: whether the application prefers a cellular network to carry the traffic.
+        required: false
+      wifi_network:
+        type: boolean
+        description: whether the application prefers a Wi-Fi network to carry the traffic.
+        required: false
+      fixed_access_network:
+        type: boolean
+        description: whether the application prefers a fixed access network to carry the traffic.
+        required: false
+
+  tosca.datatypes.mec.CategoryRef:
+    derived_from: tosca.datatypes.Root
+    description: a category reference
+    properties:
+      href:
+        type: string
+        description: reference of the category.
+        required: true
+      id:
+        type: string
+        description: unique identifier of the category.
+        required: true
+      name:
+        type: string
+        description: name of the category.
+        required: true
+      version:
+        type: string
+        description: category version.
+        required: true
+
+  tosca.datatypes.mec.Permission:
+    derived_from: tosca.datatypes.Root
+    description: access right of a particular MEC service
+    properties:
+      id:
+        type: string
+        description: name of a right within a particular MEC service
+        required: true
+      display_name:
+        type: string
+        description: human-readable string to describe the permission
+        required: false
+
+  tosca.datatypes.mec.TransportSerializerDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: requirements of a MEC application to the transport bindings
+    properties:
+      transport:
+        type: tosca.datatypes.mec.TransportDescriptor
+        description: information about the transport in this transport binding
+        required: true
+      serializers:
+        type: list
+        description: information about the serializers in this transport binding
+        required: true
+        entry_schema:
+          type: string
+          constraints:
+            - valid_values: [ JSON, XML, PROTOBUF3 ]
+
+  tosca.datatypes.mec.TransportDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: a transport
+    properties:
+      type:
+        type: string
+        description: type of the transport.
+        required: true
+        constraints:
+          - valid_values: [ REST_HTTP, MB_TOPIC_BASED, MB_ROUTING, MB_PUBSUB, RPC, RPC_STREAMING, WEBSOCKET ]
+      protocol:
+        type: string
+        description: name of the protocol used.
+        required: true
+      version:
+        type: string
+        description: version of the protocol used.
+        required: true
+      security:
+        type: tosca.datatypes.mec.SecurityInfo
+        description: information about the security used by the transport.
+        required: true
+
+  tosca.datatypes.mec.SecurityInfo:
+    derived_from: tosca.datatypes.Root
+    description: security information related to a transport
+    properties:
+      oauth2_grant_type:
+        type: list
+        description: supported OAuth 2.0 grant types.
+        required: false
+        entry_schema:
+          type: string
+          constraints:
+            - valid_values: [ OAUTH2_AUTHORIZATION_CODE, OAUTH2_IMPLICIT_GRANT, OAUTH2_RESOURCE_OWNER, OAUTH2_CLIENT_CREDENTIALS ]
+      oauth2_token_endpoint:
+        type: string
+        description: token endpoint URI.
+        required: false
+
+  tosca.datatypes.mec.TrafficFilter:
+    derived_from: tosca.datatypes.Root
+    description: specification of MEC application requirements related to traffic rules
+    properties:
+      src_address:
+        type: list
+        description: source IP address(es).
+        required: false
+        entry_schema:
+          type: string
+      dst_address:
+        type: list
+        description: destination IP address(es).
+        required: false
+        entry_schema:
+          type: string
+      src_port:
+        type: list
+        description: source port(s).
+        required: false
+        entry_schema:
+          type: string
+      dst_port:
+        type: list
+        description: destination port(s).
+        required: false
+        entry_schema:
+          type: string
+      protocol:
+        type: list
+        description: protocol of the traffic filter.
+        required: false
+        entry_schema:
+          type: string
+      tag:
+        type: list
+        description: used for tag based traffic rule.
+        required: false
+        entry_schema:
+          type: string
+      src_tunnel_address:
+        type: list
+        description: source IP address(es) for GTP tunnel.
+        required: false
+        entry_schema:
+          type: string
+      tgt_tunnel_address:
+        type: list
+        description: target IP address(es) for GTP tunnel.
+        required: false
+        entry_schema:
+          type: string
+      src_tunnel_port:
+        type: list
+        description: source port(s) for GTP tunnel.
+        required: false
+        entry_schema:
+          type: string
+      dst_tunnel_port:
+        type: list
+        description: destination port(s) for GTP tunnel.
+        required: false
+        entry_schema:
+          type: string
+      qci:
+        type: integer
+        description: QCI of the packets.
+        required: false
+        constraints:
+          - greater_than: 0
+      dscp:
+        type: integer
+        description: DSCP of IPv4 packets.
+        required: false
+      tc:
+        type: integer
+        description: TC of IPv6 packets.
+        required: false
+
+  tosca.datatypes.mec.InterfaceDescriptor:
+    derived_from: tosca.datatypes.Root
+    description: an interface of a MEC application
+    properties:
+      interface_type:
+        type: string
+        description: type of interface.
+        required: true
+        constraints:
+          - valid_values: [ TUNNEL, MAC, IP ]
+      tunnel_info:
+        type: tosca.datatypes.mec.TunnelInfo
+        description: information of the tunnel, if the interface type is TUNNEL.
+        required: false
+      src_mac_address:
+        type: string
+        description: source address of the interface, if the interface type is MAC.
+        required: false
+      dst_mac_address:
+        type: string
+        description: destination address of the interface, if the interface type is MAC.
+        required: false
+      dst_ip_address:
+        type: string
+        description: destination address of the interface, if the interface type is IP.
+        required: false
+
+  tosca.datatypes.mec.TunnelInfo:
+    derived_from: tosca.datatypes.Root
+    description: information about a tunnel transport.
+    properties:
+      tunnel_type:
+        type: string
+        description: type of tunnel.
+        required: true
+        constraints:
+          - valid_values: [ GTP-U, GRE ]
+      tunnel_dst_address:
+        type: string
+        description: destination address of the tunnel.
+        required: true
+      tunnel_src_address:
+        type: string
+        description: source address of the tunnel.
+        required: true
+      tunnel_specific_data:
+        type: string
+        description: parameters specific to the tunnel.
+        required: false
+
+node_types:
+  tosca.nodes.mec.MecApp:
+    derived_from: tosca.nodes.nfv.VNF
+    description: The generic abstract type from which all specific MEC application node types shall be derived from, together with other node types, the TOSCA service template(s) representing the AppD
+    properties:
+      flavour_id: # NFV value common for all MEC applications
+        type: string
+        constraints: [ equal: simple ]
+        default: simple
+      flavour_description: # NFV value common for all MEC applications
+        type: string
+        default: ""
+      mec_version:
+        type: list
+        description: version of the MEC system compatible with the MEC application
+        required: true
+        entry_schema:
+          type: string
+          constraints:
+            - pattern: ([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]$)
+      app_service_required:
+        type: list
+        description: services the MEC application requires to run
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.ServiceDependency
+      app_service_optional:
+        type: list
+        description: services the MEC application may use if available
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.ServiceDependency
+      app_service_produced:
+        type: list
+        description: services a MEC application is able to produce to the platform or other MEC applications. Only relevant for service-producing apps
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.ServiceDescriptor
+      app_feature_required:
+        type: list
+        description: features the MEC application requires to run
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.FeatureDependency
+      app_feature_optional:
+        type: list
+        description: features the MEC application may use if available
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.FeatureDependency
+      transport_dependencies:
+        type: list
+        description: transport required by the MEC application
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.TransportDependency
+      app_traffic_rule:
+        type: list
+        description: traffic rules the MEC application requires
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.TrafficRuleDescriptor
+      app_dns_rule:
+        type: list
+        description: DNS rules the MEC application requires
+        required: false
+        entry_schema:
+          type: tosca.datatypes.mec.DNSRuleDescriptor
+      app_latency:
+        type: tosca.datatypes.mec.LatencyDescriptor
+        description: the maximum latency tolerated by the MEC application
+        required: false
+      user_context_transfer_capability:
+        type: tosca.datatypes.mec.UserContextTransferCapability
+        description: whether the MEC application supports the user context transfer capability
+        required: false
+      app_network_policy:
+        type: tosca.datatypes.mec.AppNetworkPolicy
+        description: the application network policy of carrying the application traffic
+        required: false

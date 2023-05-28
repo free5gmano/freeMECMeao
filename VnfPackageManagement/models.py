@@ -33,3 +33,6 @@ class VnfPkgInfo(models.Model):
     usageState = models.TextField(default="NOT_IN_USE")
     userDefinedData = models.TextField(null=True, blank=True)
     
+class NsInfo(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    app_package_Id = models.TextField(null=True, blank=True)
