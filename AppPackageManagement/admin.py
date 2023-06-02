@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from VnfPackageManagement.models import *
+from AppPackageManagement.models import *
 # Register your models here.
-admin.site.register(VnfPkgInfo)
+admin.site.register(AppPkgInfo)
 admin.site.register(NsInfo)

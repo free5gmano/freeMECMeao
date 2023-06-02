@@ -3,7 +3,7 @@ import uuid
 import zipfile
 import shutil
 from django.http import JsonResponse
-from VnfPackageManagement.models import *
+from AppPackageManagement.models import *
 from django.http.multipartparser import MultiPartParser
 from utils.zip_handler import *
 from utils.tosca_parser import *
@@ -14,7 +14,7 @@ def application_packages(request):
     status = 0
     if request.method == "POST":
         id_=uuid.uuid4()
-        VnfPkgInfo.objects.create(
+        AppPkgInfo.objects.create(
             id=id_,
             appdId=None,
             appProvider=None,
@@ -85,11 +85,11 @@ def application_package_content(request, app_package_Id):
     if request.method == "PUT":
         #收檔案
         payload = MultiPartParser(request.META ,request, request.upload_handlers).parse()
-        file_path_name = "./VnfPackage/{file_name}".format(file_name=payload[1].get("file").name)
+        file_path_name = "./AppD/{file_name}".format(file_name=payload[1].get("file").name)
         
         handle_uploaded_file(file_path_name, payload[1].get("file"))
         #建資料夾
-        vnf_package_path = "./VnfPackage/{app_package_Id}".format(app_package_Id=app_package_Id)
+        vnf_package_path = "./AppD/{app_package_Id}".format(app_package_Id=app_package_Id)
         create_vnf_package_dir(vnf_package_path)
         #處理壓縮檔
         with zipfile.ZipFile(file_path_name, 'r') as zf:
@@ -99,7 +99,10 @@ def application_package_content(request, app_package_Id):
         vnfd_path = vnf_package_path+"/package_content/"+os.listdir(vnf_package_path+"/package_content/")[0]+"/Definitions/"
         vnfd_name = os.listdir(vnfd_path)[0]
         shutil.copyfile(vnfd_path+vnfd_name, vnf_package_path+"/vnfd/"+vnfd_name)
+        #mapping vnfd nsd
         
+
+
         #送NFVO
         tosca = load_TOSCA(vnf_package_path+"/vnfd/"+vnfd_name)
 
@@ -111,7 +114,7 @@ def application_package_content(request, app_package_Id):
         nfvo_nsd_content(nfvo_ns_descriptors_result["id"])
 
         #存資料庫
-        VnfPkgInfo.objects.filter(id=app_package_Id).update(appdId=nfvo_vnf_packages_result["id"])
+        AppPkgInfo.objects.filter(id=app_package_Id).update(appdId=nfvo_vnf_packages_result["id"])
         NsInfo.objects.create(id=nsdId, app_package_Id=app_package_Id)
 
         os.remove(file_path_name)

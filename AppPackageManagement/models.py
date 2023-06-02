@@ -3,7 +3,7 @@ from django.db import models
 
 # Create your models here.
 
-class VnfPkgInfo(models.Model):
+class AppPkgInfo(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     appdId = models.TextField(null=True, blank=True)
     appProvider = models.TextField(null=True, blank=True)

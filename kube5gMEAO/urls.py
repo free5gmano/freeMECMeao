@@ -16,8 +16,8 @@ Including another URLconf
 from django.urls import path
 from django.contrib import admin
 
-from VnfPackageManagement.views import *
 from AppLifecycleManagement.views import *
+from AppPackageManagement.views import *
 
 Mm1_Mm3star_URI = {
     "ApplicationPackages": "app_pkgm/v1/app_packages",

@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from utils.tosca_parser import *
 from utils.Mm1_Mm3star_Agent import *
-from VnfPackageManagement.models import *
+from AppPackageManagement.models import *
 from AppLifecycleManagement.models import *
 import uuid
 
@@ -11,7 +11,7 @@ def application_instances(request):
     status = 0
     if request.method == "POST":
         payload = json.loads(request.body.decode("utf-8"))
-        vnf_pkg_info=VnfPkgInfo.objects.filter(appdId=payload["nsdId"])
+        vnf_pkg_info=AppPkgInfo.objects.filter(appdId=payload["nsdId"])
         # print(vnf_pkg_info["id"])
         app_instance_id = uuid.uuid4()
         AppInstanceInfo.objects.create(id=app_instance_id, appdId=payload["nsdId"])
@@ -55,7 +55,7 @@ def instantiate_application_instance_task(request, appInstanceId):
 
         app_instance_info=AppInstanceInfo.objects.get(id=appInstanceId)
         print(app_instance_info.appdId)
-        vnf_pkg_info=VnfPkgInfo.objects.get(appdId=app_instance_info.appdId)
+        vnf_pkg_info=AppPkgInfo.objects.get(appdId=app_instance_info.appdId)
         ns_info = NsInfo.objects.get(app_package_Id=vnf_pkg_info.id)
 
         nfvo_ns_instances_result = nfvo_ns_instances(ns_info.id)

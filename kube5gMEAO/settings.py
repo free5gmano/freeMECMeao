@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_yasg',
-    'VnfPackageManagement.apps.VnfpackagemanagementConfig',
     "AppLifecycleManagement",
+    "AppPackageManagement"
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
