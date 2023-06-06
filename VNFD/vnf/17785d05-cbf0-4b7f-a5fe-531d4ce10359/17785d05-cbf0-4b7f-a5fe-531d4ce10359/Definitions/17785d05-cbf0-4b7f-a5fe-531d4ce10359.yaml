@@ -1,0 +1,51 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+topology_template:
+  node_templates:
+    VNF1:
+      type: tosca.nodes.nfv.VNF
+      properties:
+        descriptor_id: b1bb0ce7-ebca-4fa7-95ed-4840d70a1177
+        descriptor_version: '1.0'
+        provider: chsixnine
+        product_name: statful-test
+        software_version: 1.0.5
+    VDU1:
+      type: tosca.nodes.nfv.Vdu.Compute
+      properties:
+        sw_image_data:
+          name: statful-test
+          provider: chsixnine
+          version: 1.0.5
+          diskFormat: raw
+      capabilities:
+        virtual_compute:
+          properties:
+            virtual_memory:
+              virtual_mem_size: 512Mi
+            virtual_cpu:
+              num_virtual_cpu: 2
+      artifacts:
+        sw_image:
+          type: tosca.artifacts.nfv.SwImage
+          file: chsixnine/statful-test:1.0.5
+      attributes:
+        namespace: default
+        replicas: 1
+        name_of_service: statful-test-svc
+        ports:
+        - 25000
+    CP1:
+      type: tosca.nodes.nfv.Cpd
+      properties:
+        layer_protocol: ipv4
+      requirements:
+        virtual_binding: VDU1
+        virtual_link: VL1
+    VL1:
+      type: tosca.nodes.nfv.VnfVirtualLink
+      properties:
+        network_name: management
+        vl_profile:
+          virtual_link_protocol_data:
+            l3_protocol_data:
+              dhcp_enabled: false

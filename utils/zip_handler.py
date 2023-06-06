@@ -16,7 +16,7 @@ def create_vnf_package_dir(vnf_package_id):
     except Exception as e:
         pass
     try:
-        os.mkdir(vnf_package_id+"/vnfd")
+        os.mkdir(vnf_package_id+"/appd")
     except Exception as e:
         pass
 

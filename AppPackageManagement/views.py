@@ -89,28 +89,26 @@ def application_package_content(request, app_package_Id):
         
         handle_uploaded_file(file_path_name, payload[1].get("file"))
         #建資料夾
-        vnf_package_path = "./AppD/{app_package_Id}".format(app_package_Id=app_package_Id)
-        create_vnf_package_dir(vnf_package_path)
+        app_package_path = "./AppD/{app_package_Id}".format(app_package_Id=app_package_Id)
+        create_vnf_package_dir(app_package_path)
         #處理壓縮檔
         with zipfile.ZipFile(file_path_name, 'r') as zf:
             for name in zf.namelist():
-                zf.extract(name, path=vnf_package_path+"/package_content/")
+                zf.extract(name, path=app_package_path+"/package_content/")
         
-        vnfd_path = vnf_package_path+"/package_content/"+os.listdir(vnf_package_path+"/package_content/")[0]+"/Definitions/"
+        vnfd_path = app_package_path+"/package_content/"+os.listdir(app_package_path+"/package_content/")[0]+"/Definitions/"
         vnfd_name = os.listdir(vnfd_path)[0]
-        shutil.copyfile(vnfd_path+vnfd_name, vnf_package_path+"/vnfd/"+vnfd_name)
+        shutil.copyfile(vnfd_path+vnfd_name, app_package_path+"/appd/"+vnfd_name)
         #mapping vnfd nsd
-        
-
-
+        tosca = load_TOSCA(app_package_path+"/appd/"+vnfd_name)
+        vnfd_pkg_path = generate_vnfd(app_package_Id, payload[1].get("file").name, tosca)
         #送NFVO
-        tosca = load_TOSCA(vnf_package_path+"/vnfd/"+vnfd_name)
-
+        
         nfvo_vnf_packages_result=nfvo_vnf_packages()
-        nfvo_vnf_package_content(nfvo_vnf_packages_result["id"], payload[1].get("file").name, file_path_name)
+        nfvo_vnf_package_content(nfvo_vnf_packages_result["id"], vnfd_pkg_path.split("/").pop(), vnfd_pkg_path)
         nfvo_ns_descriptors_result=nfvo_ns_descriptors()
         nsdId = uuid.uuid4()
-        generate_nsd(str(nsdId), tosca["topology_template"]["node_templates"]["VNF1"]["properties"]["descriptor_id"], payload[1].get("file").name)
+        generate_nsd(str(nsdId), tosca["node_types"]["properties"]["descriptor_id"]["default"], payload[1].get("file").name)
         nfvo_nsd_content(nfvo_ns_descriptors_result["id"])
 
         #存資料庫

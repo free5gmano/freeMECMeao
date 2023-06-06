@@ -12,14 +12,13 @@ def application_instances(request):
     if request.method == "POST":
         payload = json.loads(request.body.decode("utf-8"))
         vnf_pkg_info=AppPkgInfo.objects.filter(appdId=payload["nsdId"])
-        # print(vnf_pkg_info["id"])
         app_instance_id = uuid.uuid4()
         AppInstanceInfo.objects.create(id=app_instance_id, appdId=payload["nsdId"])
         result = {
             "id": app_instance_id,
             "vnfInstance": [
                 {
-                "id": "11660d54-3c3a-4c0d-b70e-7cf8983d4f0d",
+                "id": app_instance_id,
                 "vnfInstanceName": "367f45fd-1dd2-11b2-8001-080027ubuntu-yxjvk",
                 "vnfdId": "hbhb",
                 "vnfProvider": "free5gmano",
@@ -54,11 +53,9 @@ def instantiate_application_instance_task(request, appInstanceId):
         payload = json.loads(request.body.decode("utf-8"))
 
         app_instance_info=AppInstanceInfo.objects.get(id=appInstanceId)
-        print(app_instance_info.appdId)
-        vnf_pkg_info=AppPkgInfo.objects.get(appdId=app_instance_info.appdId)
+        vnf_pkg_info=AppPkgInfo.objects.get(id=app_instance_info.appdId)
         ns_info = NsInfo.objects.get(app_package_Id=vnf_pkg_info.id)
-
-        nfvo_ns_instances_result = nfvo_ns_instances(ns_info.id)
+        nfvo_ns_instances_result = nfvo_ns_instances(appInstanceId)
         nfvo_instantiate(nfvo_ns_instances_result)
 
         result = 1
