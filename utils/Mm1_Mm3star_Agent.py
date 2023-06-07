@@ -261,8 +261,6 @@ def generate_vnfd(vnfd_id, file_name, tosca):
         }
     }
 
-    input(vnf_yaml)
-
     with open('VNFD/vnf/'+vnfd_id+"/"+vnfd_id+'/Definitions/'+vnfd_id+'.yaml', 'w') as file:
         documents = yaml.dump(vnf_yaml, file, sort_keys=False)
 

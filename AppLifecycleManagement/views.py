@@ -52,9 +52,9 @@ def instantiate_application_instance_task(request, appInstanceId):
     if request.method == "POST":
         payload = json.loads(request.body.decode("utf-8"))
 
-        app_instance_info=AppInstanceInfo.objects.get(id=appInstanceId)
-        vnf_pkg_info=AppPkgInfo.objects.get(id=app_instance_info.appdId)
-        ns_info = NsInfo.objects.get(app_package_Id=vnf_pkg_info.id)
+        # app_instance_info=AppInstanceInfo.objects.get(id=appInstanceId)
+        # vnf_pkg_info=AppPkgInfo.objects.get(id=app_instance_info.appdId)
+        # ns_info = NsInfo.objects.get(app_package_Id=vnf_pkg_info.id)
         nfvo_ns_instances_result = nfvo_ns_instances(appInstanceId)
         nfvo_instantiate(nfvo_ns_instances_result)
 

@@ -1,7 +1,0 @@
-CSAR-Version: 1.1
-Created-By: imac
-ETSI-Entry-Change-Log: Files/ChangeLog.txt
-ETSI-Entry-Licenses: Files/Licenses
-ETSI-Entry-Manifest: AppD-statful-test.mf
-Entry-Definitions: Definitions/17785d05-cbf0-4b7f-a5fe-531d4ce10359.yaml
-TOSCA-Meta-File-Version: 1.0
