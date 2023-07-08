@@ -1,7 +1,0 @@
-TOSCA-Meta-File-Version: 1.0
-CSAR-Version: 1.1
-Created-By: imac
-Entry-Definitions: Definitions/ubuntu.yaml
-ETSI-Entry-Manifest: ubuntu-test.mf
-ETSI-Entry-Change-Log: Files/ChangeLog.txt
-ETSI-Entry-Licenses: Files/Licenses

@@ -116,7 +116,8 @@ def application_package_content(request, app_package_Id):
         NsInfo.objects.create(id=nsdId, app_package_Id=app_package_Id)
 
         os.remove(file_path_name)
-        result = 1
+
+        result = {"id": nsdId}
         status = 202
     else:
         pass
