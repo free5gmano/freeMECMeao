@@ -152,7 +152,6 @@ def nfvo_instantiate(nfvo_ns_instances_result):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    print(response.text)
 
 def generate_vnfd(vnfd_id, file_name, tosca):
     try:
@@ -179,6 +178,7 @@ def generate_vnfd(vnfd_id, file_name, tosca):
         os.mkdir("VNFD/vnf/"+vnfd_id+"/"+vnfd_id+"/TOSCA-Metadata")
     except Exception as e:
         pass
+
     vnf_yaml={
         "tosca_definitions_version": tosca["tosca_definitions_version"],
         "topology_template": {
@@ -188,8 +188,7 @@ def generate_vnfd(vnfd_id, file_name, tosca):
                     "properties":{
                         "descriptor_id": tosca["node_types"]["properties"]["descriptor_id"]["default"],
                         "descriptor_version": tosca["node_types"]["properties"]["descriptor_version"]["default"],
-                        # "provider": tosca["node_types"]["properties"]["provider"]["default"],
-                        "provider": "chsixnine",
+                        "provider": tosca["node_types"]["properties"]["provider"]["default"],
                         "product_name": tosca["node_types"]["properties"]["product_name"]["default"],
                         "software_version": tosca["node_types"]["properties"]["software_version"]["default"],
                     }   
@@ -198,10 +197,8 @@ def generate_vnfd(vnfd_id, file_name, tosca):
                     "type": "tosca.nodes.nfv.Vdu.Compute",
                     "properties":{
                         "sw_image_data": {
-                            # "name": tosca["topology template"]["node_templates"]["MyMecAppStorage"]["artifacts"]["sw_image"]["properties"]["name"],
-                            "name": "statful-test",
-                            # "provider": tosca["node_types"]["properties"]["provider"]["default"],
-                            "provider": "chsixnine",
+                            "name": tosca["topology template"]["node_templates"]["MyMecAppStorage"]["artifacts"]["sw_image"]["properties"]["name"],
+                            "provider": tosca["node_types"]["properties"]["provider"]["default"],
                             "version": tosca["topology template"]["node_templates"]["MyMecAppStorage"]["artifacts"]["sw_image"]["properties"]["version"],
                             "diskFormat": "raw"
                         }
@@ -210,8 +207,7 @@ def generate_vnfd(vnfd_id, file_name, tosca):
                         "virtual_compute":{
                             "properties":{
                                 "virtual_memory":{
-                                    # "virtual_mem_size": tosca["topology template"]["node_templates"]["MyMecAppNode"]["capabilities"]["virtual_compute"]["properties"]["virtual_memory"]["virtual_mem_size"]
-                                    "virtual_mem_size": "512Mi"
+                                    "virtual_mem_size": tosca["topology template"]["node_templates"]["MyMecAppNode"]["capabilities"]["virtual_compute"]["properties"]["virtual_memory"]["virtual_mem_size"]
                                 },
                                 "virtual_cpu":{
                                     "num_virtual_cpu": tosca["topology template"]["node_templates"]["MyMecAppNode"]["capabilities"]["virtual_compute"]["properties"]["virtual_cpu"]["num_virtual_cpu"]
@@ -222,15 +218,20 @@ def generate_vnfd(vnfd_id, file_name, tosca):
                     "artifacts":{
                         "sw_image":{
                             "type": "tosca.artifacts.nfv.SwImage",
-                            # "file": tosca["topology template"]["node_templates"]["MyMecAppStorage"]["artifacts"]["sw_image"]["file"]
-                            "file": "chsixnine/statful-test:1.0.5"
+                            "file": tosca["topology template"]["node_templates"]["MyMecAppStorage"]["artifacts"]["sw_image"]["file"]
                         }
                     },
                     "attributes":{
                         "namespace": "default",
-                        "replicas": 1,
-                        "name_of_service": "statful-test-svc",
-                        "ports":[25000]
+                        "replicas": tosca["topology template"]["node_templates"]["MyMecAppNode"]["properties"]["vdu_profile"]["min_number_of_instances"],
+                        "name_of_service": tosca["node_types"]["properties"]["product_name"]["default"]+"-svc",
+                        "ports":tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["dst_port"],
+                        "name_of_nodeport": tosca["node_types"]["properties"]["product_name"]["default"]+"-nodeport",
+                        "protocol":[tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["protocol"][0]],
+                        "nodeport":[tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["dst_port"][0]],
+                        "nodeport_protocol": [tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["protocol"][0]],
+                        "virtualport": [tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["dst_port"][0]],
+                        "apply_cluster": tosca["topology template"]["node_templates"]["MyMecAppNode"]["properties"]["name"]
                     }
                 },
                 "CP1": {

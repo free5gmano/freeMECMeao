@@ -14,3 +14,18 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kube5gMEAO.settings')
 
 application = get_wsgi_application()
+
+try:
+    os.mkdir("NSD")
+except Exception as e:
+    pass
+
+try:
+    os.mkdir("VNFD")
+except Exception as e:
+    pass
+
+try:
+    os.mkdir("AppD")
+except Exception as e:
+    pass

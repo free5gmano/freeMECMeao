@@ -1,0 +1,179 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+description: stateful MEC application example
+imports:
+  - ./AppD-stateful-mec-app-website.yaml
+node_types:
+  MyCompany.MyMecAppType.1_0:
+  derived_from: tosca.nodes.mec.MecApp
+  properties:
+    descriptor_id:
+      type: string
+      constraints: [ equal: b1bb0ce7-ebca-4fa7-95ed-4840d70a1177 ]
+      default: b1bb0ce7-ebca-4fa7-95ed-4840d70a1177
+    provider:
+      type: string
+      constraints: [ equal: chsixnine ]
+      default: chsixnine
+    product_name:
+      type: string
+      constraints: [ equal: stateful-mec-app-website ]
+      default: stateful-mec-app-website
+    software_version:
+      type: string
+      constraints: [ equal: '1.0.0' ]
+      default: '1.0.0'
+    descriptor_version:
+      type: string
+      constraints: [ equal: '1.0' ]
+      default: '1.0'
+    vnfm_info:
+      type: list 
+      entry_schema:
+        type: string
+topology template:
+  substitution_mappings:
+    node_type: imac
+    requirements: 
+      virtual_link: [ MyMecAppCp, virtual_link ]
+  node_templates:
+    MyMecApp:
+      type: imac
+      properties:
+        mec_version: [ '1.0.0' ]
+        app_service_required:
+          - ser_name: AMS
+            version: '1.0.0'
+        app_service_produced:
+          - ser_name: stateful-mec-app-website
+            version: '1.0'
+            transports_supported:
+              - transport:
+                  type: REST_HTTP
+                  protocol: HTTP
+                  version: '2.0'
+                  security:
+                    oauth2_grant_type: [ OAUTH2_CLIENT_CREDENTIALS ]
+                    oauth2_token_endpoint: '10.0.0.218:8888/o/token/'
+                serializers:
+                  - JSON
+        app_traffic_rule:
+          - traffic_rule_id: rule1
+            filter_type: FLOW
+            priority: 1
+            traffic_filter:
+              - src_address:
+                  - 60.60.0.1
+                dst_address:
+                  - stateful-mec-app-website-nodeport
+                src_port:
+                  - 38080
+                dst_port:
+                  - 5000
+                protocol:
+                  - TCP
+                tag:
+                  - 1234
+                src_tunnel_address:
+                  - 60.60.0.1
+                tgt_tunnel_address:
+                  - free5gc-upf-svc
+                src_tunnel_port:
+                  - 2152
+                dst_tunnel_port:
+                  - 2152
+                qci: 1
+                dscp: 0
+                tc: 1
+            action: DROP
+            dst_interface:
+              - interface_type: TUNNEL
+                tunnel_info:
+                  tunnel_type: GTP-U
+                  tunnel_dst_address: free5gc-upf-svc
+                  tunnel_src_address: 60.60.0.1
+              - src_mac_address: 02-00-00-00-00-00
+              - dst_mac_address: 02-00-00-00-00-01
+              - dst_ip_address: stateful-mec-app-svc
+        app_dns_rule:
+          - dns_rule_id: b1bb0ce7-ebca-4fa7-95ed-4840d70a1177
+            domain_name: www.example.stateful-mec-app-website.com
+            ip_address_type: IP_V4
+            ip_address: 10.20.1.51
+            ttl: 100
+        app_latency:
+          max_latency: 20000000
+        user_context_transfer_capability:
+          stateful_application: true
+          user_context_transfer_support: true
+          
+    MyMecAppNode:
+      type: tosca.nodes.nfv.Vdu.Compute
+      properties:
+        name: MEC-57
+        description: stateful app flask API server apply at MEC-57
+        vdu_profile:
+          min_number_of_instances: 1
+          max_number_of_instances: 1
+      capabilities:
+        virtual_compute:
+          properties:
+            virtual_memory:
+              virtual_mem_size: 512Mi
+            virtual_cpu:
+              cpu_architecture: x86
+              num_virtual_cpu: 250m
+              virtual_cpu_clock: 1800 MHz
+      requirements:
+        - virtual_storage: MyMecAppStorage
+
+    MyMecAppStorage:
+      type: tosca.nodes.nfv.Vdu.VirtualBlockStorage
+      properties:
+        virtual_block_storage_data:
+          size_of_storage: 10 GB
+          rdma_enabled: true
+      artifacts:
+        sw_image:
+          type: tosca.artifacts.nfv.SwImage
+          file: chsixnine/stateful-mec-app-website:1.0.0
+          properties:
+            name: stateful-mec-app-website
+            version: '1.0.0'
+            checksum:
+              algorithm: sha-256
+              hash: b9c3036539fd7a5f87a1bf38eb05fdde8b556a1a7e664dbeda90ed3cd74b4f9d
+            container_format: bare
+            disk_format: raw
+            min_disk: 2 GB
+            min_ram: 8192 MiB
+            size: 2 GB
+            operating_system: ubuntu
+            supported_virtualisation_environments:
+              - KVM
+    MyMecAppCp:
+      type: tosca.nodes.nfv.VduCp
+      properties:
+        layer_protocols: [ ipv4 ]
+        role: leaf
+        description: External connection point to access MyMecApp on IPv4
+        protocol: [ associated_layer_protocol: ipv4 ]
+        trunk_mode: false
+      requirements:
+        - virtual_binding: MyMecAppNode
+  policies:
+    - instantiation_levels:
+        type: tosca.policies.nfv.InstantiationLevels
+        properties:
+          levels:
+            mec_instantiation_level:
+              description: 'mec instantiation level'
+    - mymecapp_instantiation_level:
+        type: tosca.policies.nfv.VduInstantiationLevels
+        properties:
+          levels:
+            mec_instantiation_level:
+              number_of_instances: 1
+        targets: [ MyMecAppNode ]
+
+
+
