@@ -231,7 +231,8 @@ def generate_vnfd(vnfd_id, file_name, tosca):
                         "nodeport":[tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["dst_port"][0]],
                         "nodeport_protocol": [tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["protocol"][0]],
                         "virtualport": [tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["app_traffic_rule"][0]["traffic_filter"][0]["dst_port"][0]],
-                        "apply_cluster": tosca["topology template"]["node_templates"]["MyMecAppNode"]["properties"]["name"]
+                        "apply_cluster": tosca["topology template"]["node_templates"]["MyMecAppNode"]["properties"]["name"],
+                        "stateful_application": tosca["topology template"]["node_templates"]["MyMecApp"]["properties"]["user_context_transfer_capability"]["stateful_application"]
                     }
                 },
                 "CP1": {
